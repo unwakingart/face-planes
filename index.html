@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Face Planes</title>
+<meta name="description" content="Open a portrait and see the planes of the face drawn on it, with their values. A free art tool.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Face Planes · unwakingart">
+<meta property="og:description" content="Open a portrait and see the planes of the face drawn on it, with their values. A free art tool.">
+<meta property="og:image" content="https://unwakingart.github.io/face-planes/preview.jpg">
+<meta property="og:url" content="https://unwakingart.github.io/face-planes/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;800&family=DM+Mono:wght@400&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400&display=swap">
+<style>
+
+:root { --sx-w: 1300px; --ivory: #F1EBDD; --paper: #FBF8F1; --ink: #292B26; --soft: #5F615A; --line: rgba(41,43,38,.22); --edge: rgba(41,43,38,.28); --accent: #D9603F; --cobalt: #2F55D4; --sage: #D9E2D5; --coral: #E9B9A7; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--ivory); }
+body { font: 400 15px/1.5 Figtree, system-ui, sans-serif; color: var(--ink); background: var(--ivory) url(paper.jpg) 0 0 / 900px repeat; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+.mono { font: 400 11.5px 'DM Mono', monospace; letter-spacing: .16em; text-transform: uppercase; }
+.wordmark { font: 800 23px/1 Figtree, sans-serif; letter-spacing: -.045em; position: relative; text-decoration: none; white-space: nowrap; }
+.wordmark .i { position: relative; }
+.wordmark svg { position: absolute; left: 50%; top: .08em; width: .36em; transform: translateX(-50%); }
+header.intro { max-width: 1300px; margin: 0 auto; padding: 26px 16px 6px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; }
+.tape { display: inline-block; white-space: nowrap; background: var(--sage); padding: 5px 12px 4px; transform: rotate(-1.5deg); }
+h1 { font: 400 46px/1.05 Newsreader, Georgia, serif; margin-top: 12px; letter-spacing: -.01em; }
+.sub { font-size: 17px; color: #3b3d37; margin-top: 10px; max-width: 520px; }
+.sub mark { background: linear-gradient(transparent 62%, rgba(233,185,167,.95) 62%); color: inherit; padding: 0 2px; }
+.privacy { font-size: 13px; color: var(--soft); margin-top: 10px; }
+header.intro img.collage { width: min(360px, 34vw); height: auto; display: block; }
+header.intro > div { min-width: 0; }
+@media (max-width: 700px) { .tape .more { display: none; } header.intro { grid-template-columns: 1fr 120px; gap: 10px; } h1 { font-size: 36px; } .sub { font-size: 15.5px; } header.intro img.collage { width: 120px; } }
+@media (min-width: 1000px) { h1 { font-size: 60px; } }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; max-width: 1300px; margin: 0 auto; padding: 16px; }
+@media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+.card { background: var(--paper); border-radius: 4px; padding: 16px; box-shadow: 0 1px 0 rgba(41,43,38,.06), 0 12px 26px -20px rgba(41,43,38,.6); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+button, .btn, select { font-family: inherit; font-size: 13.5px; font-weight: 500; color: var(--ink); background: transparent; border: 1.5px solid var(--ink); border-radius: 999px; padding: 6px 13px; cursor: pointer; line-height: 1.3; }
+.btn { background: var(--ink); color: var(--ivory); font-weight: 600; padding: 7px 16px; }
+button:hover, select:hover { background: rgba(41,43,38,.06); } .btn:hover { background: #3d4039; }
+button.on { background: var(--ink); color: var(--ivory); border-color: var(--ink); }
+select { appearance: none; -webkit-appearance: none; padding-right: 28px; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23292B26' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 11px center / 10px 6px; }
+.seg { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 3px; background: rgba(41,43,38,.07); border-radius: 999px; }
+.seg button { border-color: transparent; }
+.seg button.on { border-color: var(--ink); }
+label.small { font-size: 13px; color: var(--soft); display: inline-flex; align-items: center; gap: 6px; }
+input[type=range] { accent-color: var(--ink); width: 90px; }
+#stage { position: relative; background: #fff; border: 1.5px dashed var(--edge); border-radius: 4px; min-height: 360px; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; }
+#stage.drag { border-color: var(--cobalt); background: #EEF1FB; }
+#empty { text-align: center; color: var(--soft); padding: 40px 16px; font-size: 15px; line-height: 1.6; }
+#empty b { color: var(--ink); }
+canvas#view { display: none; max-width: 100%; cursor: crosshair; } canvas#view.panning { cursor: grabbing; }
+.hint { font-size: 13px; color: var(--soft); margin-top: 10px; line-height: 1.55; }
+h2 { font: 400 11.5px 'DM Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--soft); margin-bottom: 12px; }
+.side { display: flex; flex-direction: column; gap: 16px; }
+.none { font-size: 13px; color: var(--soft); }
+.sw { border-radius: 4px; border: 1px solid var(--edge); background: #eee; }
+.swlabel { font-size: 11px; color: var(--soft); text-align: center; margin-top: 3px; }
+.val { font: 400 40px/1 Newsreader, serif; } .val small { font: 400 12.5px Figtree, sans-serif; color: var(--soft); display: block; margin-top: 4px; }
+.mixbox { border-top: 1px dashed var(--line); padding-top: 10px; margin-top: 10px; } .mixbox:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+.mixhead { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 600; }
+.mixhead span { font-weight: 400; font-size: 12px; color: var(--soft); }
+.mixsw { display: flex; gap: 6px; align-items: center; margin: 8px 0 6px; font-size: 12px; color: var(--soft); }
+.mixsw .c { width: 44px; height: 30px; border-radius: 4px; border: 1px solid var(--edge); }
+.parts { list-style: none; font-size: 13px; display: flex; flex-direction: column; gap: 3px; }
+.parts li { display: flex; align-items: center; gap: 7px; } .parts b { width: 22px; text-align: right; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--edge); flex: 0 0 auto; }
+details.paints { margin-top: 12px; font-size: 13px; } details.paints summary { cursor: pointer; font-weight: 600; text-decoration: underline; text-decoration-color: var(--coral); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+#extras label { display: flex; align-items: center; gap: 7px; padding: 2px 0; }
+#extras input, .pin input[type=checkbox] { accent-color: var(--ink); }
+footer { margin-top: 50px; background: var(--ink); color: var(--ivory); padding: 40px 20px 44px; text-align: center; }
+footer .wordmark { font-size: 34px; display: inline-block; }
+footer .mono { color: #d9d3c4; margin-top: 10px; text-transform: none; }
+footer p { margin: 18px auto 0; max-width: 640px; font-size: 13px; color: #d9d3c4; line-height: 1.6; }
+#pick { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); background: var(--ink); color: var(--paper); border-radius: 999px; padding: 8px 16px; font-size: 14px; display: none; pointer-events: none; }
+#status { pointer-events: none; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: rgba(251,248,241,.96); border-radius: 4px; padding: 10px 16px; font-size: 14px; box-shadow: 0 10px 22px -16px rgba(41,43,38,.6); display: none; }
+.pname { font: italic 400 22px/1.2 Newsreader, serif; } .pside { font-size: 12px; color: var(--soft); margin-top: 2px; }
+.readout { display: grid; grid-template-columns: 56px 56px 1fr; gap: 10px; align-items: center; margin-top: 10px; }
+.sw { width: 56px; height: 56px; }
+.val { font-size: 36px; }
+.fam h3 { font-size: 13px; font-weight: 600; margin: 10px 0 4px; display: flex; align-items: center; gap: 6px; } .fam h3 i { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--edge); display: inline-block; }
+.fam ul { list-style: none; font-size: 13px; columns: 2; column-gap: 12px; } .fam li { break-inside: avoid; padding: 1px 0; display: flex; gap: 6px; } .fam li b { width: 16px; text-align: right; flex: 0 0 auto; }
+</style>
+<style id="site-menu">
+  
+  .sx-site { position: sticky; top: 0; z-index: 50; background: rgba(241,235,221,.94); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); border-bottom: 1px solid rgba(41,43,38,.12); font-family: Figtree, system-ui, sans-serif; color: #292B26; }
+  .sx-row { max-width: var(--sx-w, 1080px); margin: 0 auto; padding: 0 20px; height: 62px; display: flex; align-items: center; gap: 28px; }
+  .sx-wm { font: 800 26px/1 Figtree, sans-serif; letter-spacing: -.045em; position: relative; text-decoration: none; color: inherit; margin-right: auto; transition: opacity .2s; }
+  .sx-wm .i { position: relative; } .sx-wm svg { position: absolute; left: 50%; top: .08em; width: .36em; transform: translateX(-50%); color: #EF7A56; }
+  .sx-nav { display: flex; gap: 26px; font: 500 15px Figtree, sans-serif; }
+  .sx-nav a { text-decoration: none; padding: 3px 0; border-bottom: 2px solid transparent; color: inherit; white-space: nowrap; }
+  .sx-nav a:hover { border-bottom-color: rgba(41,43,38,.3); }
+  .sx-n { font: italic 400 14px Newsreader, Georgia, serif; color: #5F615A; margin-right: 6px; }
+  .sx-nav a.on { border-bottom-color: #E9B9A7; font-weight: 600; }
+  .sx-soc { display: flex; gap: 12px; } .sx-soc a { color: inherit; display: flex; }
+  .sx-menu { display: none; align-items: center; gap: 8px; font: 600 14px Figtree, sans-serif; border: 1.5px solid #292B26; border-radius: 999px; padding: 8px 14px; background: transparent; color: inherit; cursor: pointer; }
+  .sx-menu i { display: block; width: 14px; height: 9px; border-top: 1.6px solid; border-bottom: 1.6px solid; position: relative; }
+  .sx-menu i::after { content: ""; position: absolute; left: 0; right: 0; top: 2.2px; border-top: 1.6px solid; }
+  .sx-cta { display: inline-flex; background: #292B26; color: #F1EBDD; text-decoration: none; font: 600 14px Figtree, sans-serif; padding: 10px 18px; border-radius: 999px; white-space: nowrap; }
+  .sx-sub { border-top: 1px dashed rgba(41,43,38,.18); }
+  .sx-sub .sx-row { height: 42px; gap: 22px; font: 400 12px 'DM Mono', monospace; letter-spacing: .14em; text-transform: uppercase; overflow-x: auto; scrollbar-width: none; }
+  .sx-sub .sx-row::-webkit-scrollbar { display: none; }
+  .sx-sub b { font-weight: 400; color: #5F615A; white-space: nowrap; }
+  .sx-sub nav { display: flex; gap: 22px; }
+  .sx-sub a { text-decoration: none; color: inherit; white-space: nowrap; padding: 4px 9px; margin: 0 -9px; }
+  .sx-sub a.on { background: #D9E2D5; }
+  .sx-sub .sx-tool { display: inline-flex; align-items: center; gap: 7px; } .sx-sub .sx-tool img { width: 18px; height: 18px; }
+  .sx-sheet { display: none; position: fixed; inset: 0; z-index: 60; background: #F1EBDD; padding: 0 20px 30px; overflow: auto; font-family: Figtree, system-ui, sans-serif; color: #292B26; }
+  .sx-sheet .sx-row { padding: 0; }
+  .sx-close { margin-left: auto; font: 600 14px Figtree, sans-serif; border: 1.5px solid #292B26; border-radius: 999px; padding: 8px 14px; background: transparent; color: inherit; cursor: pointer; }
+  .sx-way { display: block; text-decoration: none; color: inherit; padding: 20px 0 18px; border-bottom: 1px dashed rgba(41,43,38,.25); }
+  .sx-way .sx-n { display: inline-flex; width: 30px; height: 30px; border: 1.5px solid; border-radius: 50%; align-items: center; justify-content: center; font-size: 15px; color: inherit; margin-right: 12px; vertical-align: 5px; }
+  .sx-way b { font: 400 34px/1.1 Newsreader, Georgia, serif; }
+  .sx-way small { display: block; font: 400 12px 'DM Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: #5F615A; margin: 8px 0 0 42px; }
+  .sx-way.on b { background: linear-gradient(transparent 62%, rgba(233,185,167,.95) 62%); }
+  .sx-tools { margin: 6px 0 0 42px; display: grid; gap: 4px; }
+  .sx-tools a { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; font: 500 17px Figtree, sans-serif; padding: 6px 0; } .sx-tools img { width: 26px; height: 26px; }
+  .sx-follow { margin-top: 26px; display: flex; gap: 10px; } .sx-follow a { display: inline-flex; gap: 8px; align-items: center; border: 1.5px solid #292B26; border-radius: 999px; padding: 10px 16px; text-decoration: none; color: inherit; font: 600 14px Figtree, sans-serif; }
+  .sx-art { display: block; width: 78%; max-width: 420px; margin: 34px auto 0; height: auto; }
+  html.sx-open { overflow: hidden; } html.sx-open .sx-sheet { display: block; }
+  .sx-watch .sx-site .sx-wm { opacity: 0; pointer-events: none; } .sx-watch.sx-past .sx-site .sx-wm { opacity: 1; pointer-events: auto; }
+  .sx-map { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 22px 30px; max-width: 760px; margin: 28px auto 0; text-align: left; font-family: Figtree, system-ui, sans-serif; }
+  .sx-map h4 { margin: 0 0 8px; font: 400 11px 'DM Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: #bdb6a6; }
+  .sx-map a { display: block; color: #F1EBDD; text-decoration: none; font-size: 15px; padding: 3px 0; } .sx-map a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .sx-nav, .sx-soc, .sx-sub b { display: none; } .sx-menu { display: inline-flex; } .sx-row { gap: 10px; } .sx-wm { font-size: 24px; } }
+</style>
+</head>
+<body>
+
+<header class="sx-site"><div class="sx-row">
+  <a class="sx-wm" href="https://unwakingart.github.io/" data-site aria-label="unwakingart, home">unwak<span class="i">ı<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0 C10.8 6.5 13.5 9.2 20 10 C13.5 10.8 10.8 13.5 10 20 C9.2 13.5 6.5 10.8 0 10 C6.5 9.2 9.2 6.5 10 0Z" fill="currentColor"/></svg></span>ngart</a>
+  <nav class="sx-nav" aria-label="unwakingart"><a href="https://unwakingart.github.io/hangouts/" data-site><span class="sx-n">01</span>Creative hangouts</a><a href="https://unwakingart.github.io/trips/" data-site><span class="sx-n">02</span>Study trips</a><a href="https://unwakingart.github.io/value-finder/" data-site class="on"><span class="sx-n">03</span>Free tools</a></nav>
+  <div class="sx-soc"><a href="https://www.instagram.com/unwakingart/" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg></a><a href="https://www.tiktok.com/@unwakingart" target="_blank" rel="noopener" aria-label="TikTok"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.4 2.3 1.9 3.8 4.2 4v3.1c-1.6 0-3-.5-4.2-1.3v6.4c0 3.4-2.6 5.8-5.8 5.8S5 18.6 5 15.3c0-3.3 2.8-5.9 6.2-5.6v3.2c-1.6-.3-3 .8-3 2.4 0 1.4 1.1 2.5 2.6 2.5 1.5 0 2.6-1.1 2.6-2.6V3h3.2Z"/></svg></a></div>
+  <button class="sx-menu" type="button" aria-expanded="false" aria-controls="sx-sheet"><i></i>Menu</button>
+</div><div class="sx-sub"><div class="sx-row"><b>Free art tools</b><nav aria-label="Art tools"><a class="sx-tool" href="https://unwakingart.github.io/value-finder/" data-site><img src="https://unwakingart.github.io/value-finder/icon.png" width="18" height="18" alt="">Value Finder</a><a class="sx-tool on" href="https://unwakingart.github.io/face-planes/" data-site aria-current="page"><img src="https://unwakingart.github.io/face-planes/icon.png" width="18" height="18" alt="">Face Planes</a><a class="sx-tool" href="https://unwakingart.github.io/drawing-notebook/" data-site><img src="https://unwakingart.github.io/drawing-notebook/icon.png" width="18" height="18" alt="">Drawing notebook</a></nav></div></div></header>
+<div class="sx-sheet" id="sx-sheet" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="sx-row"><a class="sx-wm" href="https://unwakingart.github.io/" data-site aria-label="unwakingart, home">unwak<span class="i">ı<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0 C10.8 6.5 13.5 9.2 20 10 C13.5 10.8 10.8 13.5 10 20 C9.2 13.5 6.5 10.8 0 10 C6.5 9.2 9.2 6.5 10 0Z" fill="currentColor"/></svg></span>ngart</a><button class="sx-close" type="button">Close ✕</button></div>
+  <a class="sx-way" href="https://unwakingart.github.io/hangouts/" data-site><span class="sx-n">01</span><b>Creative hangouts</b><small>Makati · at a café</small></a>
+  <a class="sx-way" href="https://unwakingart.github.io/trips/" data-site><span class="sx-n">02</span><b>Art study trips</b><small>Hanoi · March 2027</small></a>
+  <div class="sx-way on"><span class="sx-n">03</span><b>Free art tools</b><div class="sx-tools"><a href="https://unwakingart.github.io/value-finder/" data-site><img src="https://unwakingart.github.io/value-finder/icon.png" width="26" height="26" alt="">Value Finder</a><a href="https://unwakingart.github.io/face-planes/" data-site><img src="https://unwakingart.github.io/face-planes/icon.png" width="26" height="26" alt="">Face Planes</a><a href="https://unwakingart.github.io/drawing-notebook/" data-site><img src="https://unwakingart.github.io/drawing-notebook/icon.png" width="26" height="26" alt="">Drawing notebook</a></div></div>
+  <div class="sx-follow"><a href="https://www.instagram.com/unwakingart/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none"/></svg> Instagram</a><a href="https://www.tiktok.com/@unwakingart" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M16.6 3c.4 2.3 1.9 3.8 4.2 4v3.1c-1.6 0-3-.5-4.2-1.3v6.4c0 3.4-2.6 5.8-5.8 5.8S5 18.6 5 15.3c0-3.3 2.8-5.9 6.2-5.6v3.2c-1.6-.3-3 .8-3 2.4 0 1.4 1.1 2.5 2.6 2.5 1.5 0 2.6-1.1 2.6-2.6V3h3.2Z"/></svg> TikTok</a></div>
+  <img class="sx-art" src="https://unwakingart.github.io/images/collage-face.webp" width="860" height="460" alt="" loading="lazy">
+</div>
+<script>
+(function () {
+  var h = document.documentElement, b = document.querySelector('.sx-menu'), s = document.getElementById('sx-sheet');
+  function set(open) { h.classList.toggle('sx-open', open); b.setAttribute('aria-expanded', open); if (open) s.querySelector('.sx-close').focus(); else b.focus(); }
+  b.addEventListener('click', function () { set(true); });
+  s.querySelector('.sx-close').addEventListener('click', function () { set(false); });
+  s.addEventListener('click', function (e) { if (e.target.closest('a[href*="#"]')) set(false); });
+  document.addEventListener('keydown', function (e) {
+    if (!h.classList.contains('sx-open')) return;
+    if (e.key === 'Escape') set(false);
+    if (e.key === 'Tab') {
+      var f = s.querySelectorAll('a[href], button'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+      else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+    }
+  });
+  var wide = window.matchMedia('(min-width: 761px)');
+  function shut() { if (wide.matches && h.classList.contains('sx-open')) { h.classList.remove('sx-open'); b.setAttribute('aria-expanded', false); } }
+  if (wide.addEventListener) wide.addEventListener('change', shut); else wide.addListener(shut);
+
+  function watch() {
+    var big = document.querySelector('.sx-home .top .wordmark');
+    if (big && 'IntersectionObserver' in window) { document.body.classList.add('sx-watch'); new IntersectionObserver(function (es) { document.body.classList.toggle('sx-past', !es[0].isIntersecting); }).observe(big); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch); else watch();
+})();
+</script>
+
+<header class="intro">
+  <div>
+    <span class="mono tape">Art tools<span class="more"> · Look a little closer</span></span>
+    <h1>Face Planes</h1>
+    <p class="sub">Open a portrait, and the <mark>planes of the face</mark> are drawn on it: which ones face the light, which turn away, and how to mix each.</p>
+    <p class="privacy">Free to use. Your photo stays on your device: nothing is uploaded.</p>
+  </div>
+  <img class="collage" src="collage.webp" width="1000" height="929" alt="A collage: an upturned face from Rubens's drawing book, torn from the engraving, with plane lines drawn across the cheek, over ochre and sage paper">
+</header>
+<main>
+  <section class="card">
+    <div class="toolbar">
+      <label class="btn">Open a portrait<input type="file" id="file" accept="image/*" hidden></label>
+      <span class="seg" id="views">
+        <button data-view="lines" class="on">Plane lines</button>
+        <button data-view="values">Values</button>
+        <button data-view="families">Light and shadow</button>
+        <button data-view="colors">Colors</button>
+      </span>
+      <select id="steps" title="How many value steps">
+        <option value="3">3 values</option>
+        <option value="5" selected>5 values</option>
+        <option value="11">11 values</option>
+      </select>
+      <button id="nums">Numbers</button>
+      <label class="small">Fill <input type="range" id="alpha" min="20" max="100" value="100"></label>
+      <button id="detail" title="Finer planes for the eyes, nose and lips">Detail</button>
+      <button id="earbtn" title="Place an ear: click its top, the bottom of the earlobe, then its back edge">Add an ear</button>
+      <span class="seg" id="zoombar">
+        <button id="zout" title="Zoom out">−</button>
+        <button id="zin" title="Zoom in">+</button>
+        <button id="zface" title="Zoom to the face">Face</button>
+        <button data-zoom="eyes" title="Zoom to the eyes">Eyes</button>
+        <button data-zoom="nose" title="Zoom to the nose">Nose</button>
+        <button data-zoom="lips" title="Zoom to the lips">Lips</button>
+        <button id="zear" title="Zoom to the ear you placed">Ear</button>
+        <button id="zall" title="Show the whole photo">Whole photo</button>
+      </span>
+    </div>
+    <div id="stage">
+      <div id="empty"><b>Open a portrait</b>, drop one here, or paste it (Ctrl or ⌘ + V).<br>Works best with one face, seen from the front or turned a little.<br>Your photo stays on your computer: nothing is uploaded.</div>
+      <canvas id="view"></canvas>
+      <div id="status"></div>
+      <div id="pick"></div>
+    </div>
+    <p class="hint"><b>Plane lines</b> draws the planes on the photo. <b>Values</b> fills each plane with its one value, like a value map. <b>Light and shadow</b> splits the planes into the light family and the shadow family. <b>Colors</b> fills each plane with its own color, like painting in tiles. Hover over a plane to see its name and how to mix it. <b>Detail</b> splits the eyes, nose and lips into finer planes (Eyes, Nose and Lips zoom in and turn it on). The face finder doesn't see ears, so <b>Add an ear</b> asks you to click the top of the ear, the bottom of the earlobe and the back edge, and fits the ear's planes to them; drag the three dots to adjust. <b>Zoom</b> with the buttons, the scroll wheel, a trackpad pinch or a double click; drag to move around.</p>
+  </section>
+  <aside class="side">
+    <div class="card">
+      <h2>Under the pointer</h2>
+      <div id="plane"><div class="none">Hover over a plane.</div></div>
+    </div>
+    <div class="card">
+      <h2>How to mix it</h2>
+      <div id="mixes"><div class="none">Hover over a plane.</div></div>
+      <details class="paints"><summary>Your paints</summary>
+        <div class="none" style="margin:6px 0">White, yellow ochre, vermilion and ivory black are always in. Tick the other paints you have:</div>
+        <div id="extras"></div>
+      </details>
+      <div class="none" style="margin-top:8px">Recipes are estimates from screen colors, in parts by volume. Your easel has the final say: test a dab and adjust.</div>
+    </div>
+    <div class="card fam" id="fam"><h2>Light and shadow families</h2><div class="none">Open a portrait to sort its planes.</div></div>
+  </aside>
+</main>
+<footer>
+  <a class="wordmark" href="https://unwakingart.github.io/" data-site aria-label="unwakingart">unwak<span class="i">ı<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0 C10.8 6.5 13.5 9.2 20 10 C13.5 10.8 10.8 13.5 10 20 C9.2 13.5 6.5 10.8 0 10 C6.5 9.2 9.2 6.5 10 0Z" fill="currentColor"/></svg></span>ngart</a>
+  <div class="mono">a little outside the lines</div>
+  <p>Values use the painters' 0–10 scale (0 black, 10 white). The planes are placed on the face points found by MediaPipe (Google), which runs in your browser. Collage: a face from Rubens's drawing book, engraving, Rijksmuseum (public domain).</p>
+  <div class="sx-map"><div><h4>Creative hangouts</h4><a href="https://unwakingart.github.io/hangouts/" data-site>The hangout</a><a href="https://unwakingart.github.io/hangouts/#tickets" data-site>Dates &amp; fee</a></div><div><h4>Art study trips</h4><a href="https://unwakingart.github.io/trips/" data-site>Oil Painting in Hanoi</a><a href="https://unwakingart.github.io/trips/#payment" data-site>How to apply</a></div><div><h4>Free art tools</h4><a href="https://unwakingart.github.io/value-finder/" data-site>Value Finder</a><a href="https://unwakingart.github.io/face-planes/" data-site>Face Planes</a><a href="https://unwakingart.github.io/drawing-notebook/" data-site>Drawing notebook</a></div><div><h4>About</h4><a href="https://unwakingart.github.io/michelle/" data-site>My art journey</a></div><div><h4>Follow</h4><a href="https://www.instagram.com/unwakingart/" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@unwakingart" target="_blank" rel="noopener">TikTok</a></div></div>
+  <p>@unwakingart on <a href="https://www.instagram.com/unwakingart/" target="_blank" rel="noopener">Instagram</a> and <a href="https://www.tiktok.com/@unwakingart" target="_blank" rel="noopener">TikTok</a></p>
+</footer>
+<script>
+const PLANES = [{"n":"forehead, front","s":"","p":[10,109,69,66,107,9,336,296,299,338],"w":-1,"g":"base"},{"n":"between the brows","s":"","p":[9,107,55,8,285,336],"w":-1,"g":"base"},{"n":"top of the nose root","s":"","p":[8,55,193,168,417,285],"w":-1,"g":"base"},{"n":"nose, top","s":"","p":[168,122,196,3,51,45,4,275,281,248,419,351],"w":-1,"g":"rep"},{"n":"nose, tip","s":"","p":[4,45,44,19,274,275],"w":-1,"g":"rep"},{"n":"nose, underside","s":"","p":[19,44,79,166,64,98,97,2,326,327,294,392,309,274],"w":-1,"g":"base"},{"n":"above the upper lip","s":"","p":[2,97,167,37,0,267,393,326],"w":-1,"g":"rep"},{"n":"upper lip","s":"","p":[0,37,39,40,185,61,191,80,81,82,13,312,311,310,415,291,409,270,269,267],"w":-1,"g":"rep"},{"n":"lower lip","s":"","p":[14,87,178,88,95,61,146,91,181,84,17,314,405,321,375,291,324,318,402,317],"w":-1,"g":"rep"},{"n":"under the lower lip","s":"","p":[17,84,181,182,83,18,313,406,405,314],"w":-1,"g":"base"},{"n":"chin, front","s":"","p":[18,83,201,208,175,428,421,313],"w":-1,"g":"base"},{"n":"chin, bottom","s":"","p":[175,208,171,148,152,377,396,428],"w":-1,"g":"base"},{"n":"forehead, side","s":"right","p":[109,67,103,54,68,63,105,66,69],"w":-1,"g":"base"},{"n":"forehead, side","s":"left","p":[338,297,332,284,298,293,334,296,299],"w":1,"g":"base"},{"n":"temple","s":"right","p":[54,21,162,127,34,143,35,124,46,63,68],"w":-1,"g":"base"},{"n":"temple","s":"left","p":[284,251,389,356,264,372,265,353,276,293,298],"w":1,"g":"base"},{"n":"brow ridge","s":"right","p":[107,66,105,63,46,53,52,65,55],"w":-1,"g":"base"},{"n":"brow ridge","s":"left","p":[336,296,334,293,276,283,282,295,285],"w":1,"g":"base"},{"n":"eye socket","s":"right","p":[55,65,52,53,46,124,113,130,247,30,29,27,28,56,190,189,193],"w":-1,"g":"rep"},{"n":"eye socket","s":"left","p":[285,295,282,283,276,353,342,359,467,260,259,257,258,286,414,413,417],"w":1,"g":"rep"},{"n":"eye","s":"right","p":[130,247,30,29,27,28,56,190,243,112,26,22,23,24,110,25],"w":1,"g":"rep"},{"n":"eye","s":"left","p":[359,467,260,259,257,258,286,414,463,341,256,252,253,254,339,255],"w":-1,"g":"rep"},{"n":"under the eye","s":"right","p":[124,113,130,25,110,24,23,22,26,112,243,244,128,121,120,119,118,117,111,35],"w":1,"g":"base"},{"n":"under the eye","s":"left","p":[353,342,359,255,339,254,253,252,256,341,463,464,357,350,349,348,347,346,340,265],"w":-1,"g":"base"},{"n":"side of the nose","s":"right","p":[193,189,190,243,244,128,114,217,198,131,220,45,51,3,196,122,168],"w":-1,"g":"base"},{"n":"side of the nose","s":"left","p":[417,413,414,463,464,357,343,437,420,360,440,275,281,248,419,351,168],"w":1,"g":"base"},{"n":"nostril wing","s":"right","p":[217,198,131,220,45,44,79,166,64,129,209,126],"w":1,"g":"base"},{"n":"nostril wing","s":"left","p":[437,420,360,440,275,274,309,392,294,358,429,355],"w":-1,"g":"base"},{"n":"cheekbone, front","s":"right","p":[111,117,118,119,120,100,101,50,123,116],"w":1,"g":"base"},{"n":"cheekbone, front","s":"left","p":[340,346,347,348,349,329,330,280,352,345],"w":-1,"g":"base"},{"n":"cheek beside the nose","s":"right","p":[120,121,128,114,217,126,209,129,64,98,203,36,101,100],"w":1,"g":"base"},{"n":"cheek beside the nose","s":"left","p":[349,350,357,343,437,355,429,358,294,327,423,266,330,329],"w":-1,"g":"base"},{"n":"cheek, side","s":"right","p":[127,34,143,35,111,116,123,137,93,234],"w":1,"g":"base"},{"n":"cheek, side","s":"left","p":[356,264,372,265,340,345,352,366,323,454],"w":-1,"g":"base"},{"n":"under the cheekbone","s":"right","p":[137,123,50,101,36,203,206,187,147,177],"w":1,"g":"base"},{"n":"under the cheekbone","s":"left","p":[366,352,280,330,266,423,426,411,376,401],"w":-1,"g":"base"},{"n":"beside the mouth","s":"right","p":[98,203,206,216,186,57,61,185,40,39,37,167,97],"w":-1,"g":"base"},{"n":"beside the mouth","s":"left","p":[327,423,426,436,410,287,291,409,270,269,267,393,326],"w":1,"g":"base"},{"n":"lower cheek","s":"right","p":[147,187,206,216,186,57,212,214,192],"w":1,"g":"base"},{"n":"lower cheek","s":"left","p":[376,411,426,436,410,287,432,434,416],"w":-1,"g":"base"},{"n":"jaw, side","s":"right","p":[93,137,177,147,192,135,136,172,58,132],"w":1,"g":"base"},{"n":"jaw, side","s":"left","p":[323,366,401,376,416,364,365,397,288,361],"w":-1,"g":"base"},{"n":"side of the chin","s":"right","p":[212,57,61,146,91,181,182,83,201,208,171,148,176,149,170,211,210,214],"w":1,"g":"base"},{"n":"side of the chin","s":"left","p":[432,287,291,375,321,405,406,313,421,428,396,377,400,378,395,431,430,434],"w":-1,"g":"base"},{"n":"jaw, front","s":"right","p":[192,214,210,211,170,149,150,136,135],"w":1,"g":"base"},{"n":"jaw, front","s":"left","p":[416,434,430,431,395,378,379,365,364],"w":-1,"g":"base"},{"n":"nose bridge, upper","s":"","p":[168,122,196,197,419,351],"w":-1,"g":"det"},{"n":"nose bridge, lower","s":"","p":[197,196,3,51,5,281,248,419],"w":-1,"g":"det"},{"n":"top of the nose ball","s":"","p":[5,51,45,4,275,281],"w":-1,"g":"det"},{"n":"nose tip, front","s":"","p":[4,45,44,1,274,275],"w":-1,"g":"det"},{"n":"nose tip, underside","s":"","p":[1,44,19,274],"w":-1,"g":"det"},{"n":"upper lip, middle","s":"","p":[0,37,72,38,82,13,312,268,302,267],"w":-1,"g":"det"},{"n":"between the lips","s":"","p":[13,82,81,80,191,78,95,88,178,87,14,317,402,318,324,308,415,310,311,312],"w":-1,"g":"det","pr":2},{"n":"lower lip, middle","s":"","p":[14,87,86,85,84,17,314,315,316,317],"w":-1,"g":"det"},{"n":"under the brow","s":"right","p":[55,65,52,53,46,124,113,225,224,223,222,221,189,193],"w":-1,"g":"det"},{"n":"under the brow","s":"left","p":[285,295,282,283,276,353,342,445,444,443,442,441,413,417],"w":1,"g":"det"},{"n":"lid fold, outer","s":"right","p":[113,225,224,223,27,29,30,247,130],"w":1,"g":"det"},{"n":"lid fold, outer","s":"left","p":[342,445,444,443,257,259,260,467,359],"w":-1,"g":"det"},{"n":"lid fold, inner","s":"right","p":[223,222,221,189,190,56,28,27],"w":1,"g":"det"},{"n":"lid fold, inner","s":"left","p":[443,442,441,413,414,286,258,257],"w":-1,"g":"det"},{"n":"upper lid, outer","s":"right","p":[130,247,30,29,160,161,246,33],"w":1,"g":"det"},{"n":"upper lid, outer","s":"left","p":[359,467,260,259,387,388,466,263],"w":-1,"g":"det"},{"n":"upper lid, middle","s":"right","p":[29,27,28,158,159,160],"w":1,"g":"det"},{"n":"upper lid, middle","s":"left","p":[259,257,258,385,386,387],"w":-1,"g":"det"},{"n":"upper lid, inner","s":"right","p":[28,56,190,243,133,173,157,158],"w":1,"g":"det"},{"n":"upper lid, inner","s":"left","p":[258,286,414,463,362,398,384,385],"w":-1,"g":"det"},{"n":"white of the eye, outer","s":"right","p":[33,246,161,160,159,145,144,163,7],"w":1,"g":"det"},{"n":"white of the eye, outer","s":"left","p":[263,466,388,387,386,374,373,390,249],"w":-1,"g":"det"},{"n":"white of the eye, inner","s":"right","p":[159,158,157,173,133,155,154,153,145],"w":1,"g":"det"},{"n":"white of the eye, inner","s":"left","p":[386,385,384,398,362,382,381,380,374],"w":-1,"g":"det"},{"n":"lower lid, outer","s":"right","p":[130,25,110,24,144,163,7,33],"w":-1,"g":"det"},{"n":"lower lid, outer","s":"left","p":[359,255,339,254,373,390,249,263],"w":1,"g":"det"},{"n":"lower lid, inner","s":"right","p":[24,23,22,26,112,243,133,155,154,153,145,144],"w":-1,"g":"det"},{"n":"lower lid, inner","s":"left","p":[254,253,252,256,341,463,362,382,381,380,374,373],"w":1,"g":"det"},{"n":"nostril","s":"right","p":[79,238,20,60,75,166],"w":1,"g":"det","pr":2},{"n":"nostril","s":"left","p":[309,458,250,290,305,392],"w":-1,"g":"det","pr":2},{"n":"philtrum ridge","s":"right","p":[2,97,167,37,0,164],"w":-1,"g":"det"},{"n":"philtrum ridge","s":"left","p":[2,326,393,267,0,164],"w":1,"g":"det"},{"n":"upper lip, top","s":"right","p":[37,39,40,185,61,76,184,74,73,72],"w":-1,"g":"det"},{"n":"upper lip, top","s":"left","p":[267,269,270,409,291,306,408,304,303,302],"w":1,"g":"det"},{"n":"upper lip, underside","s":"right","p":[72,73,74,184,76,62,78,191,80,81,82,38],"w":-1,"g":"det"},{"n":"upper lip, underside","s":"left","p":[302,303,304,408,306,292,308,415,310,311,312,268],"w":1,"g":"det"},{"n":"lower lip, top","s":"right","p":[87,178,88,95,78,62,76,77,90,180,85,86],"w":-1,"g":"det"},{"n":"lower lip, top","s":"left","p":[317,402,318,324,308,292,306,307,320,404,315,316],"w":1,"g":"det"},{"n":"lower lip, underside","s":"right","p":[85,180,90,77,76,61,146,91,181,84],"w":-1,"g":"det"},{"n":"lower lip, underside","s":"left","p":[315,404,320,307,306,291,375,321,405,314],"w":1,"g":"det"}];
+</script>
+<script type="module">
+import { FaceLandmarker, FilesetResolver } from 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+const $ = s => document.querySelector(s);
+const view = $('#view'), ctx = view.getContext('2d'), stage = $('#stage');
+let ALL = [], detail = false, ear = null, earPick = 0, earDrag = null, W = 0, H = 0, photo = null, rgb = null, P = null, ids = null, scaleK = 1, zoom = 1, vx = 0, vy = 0, mode = 'lines', nSteps = 5, nums = false, alpha = 1, hover = -1, cut = 5;
+const toV = L => L / 25.5;
+
+const FEATURE = new Set(['eye', 'upper lip', 'lower lip', 'brow ridge', 'iris', 'white of the eye, outer', 'white of the eye, inner', 'between the lips',
+  'upper lip, middle', 'upper lip, top', 'upper lip, underside', 'lower lip, middle', 'lower lip, top', 'lower lip, underside']);
+
+const OPENING = { right: [33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7], left: [263, 466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249] };
+const IRIS = { right: [468, 469, 470, 471, 472], left: [473, 474, 475, 476, 477] };
+
+const EAR = [
+  ['ear, outer rim', [[.12,.10],[.22,.02],[.36,0],[.48,.05],[.56,.16],[.59,.30],[.58,.45],[.54,.60],[.47,.72],[.40,.80],[.36,.74],[.43,.64],[.48,.52],[.50,.38],[.48,.24],[.42,.14],[.32,.09],[.22,.11],[.16,.17],[.14,.25]]],
+  ['ear, groove inside the rim', [[.22,.11],[.32,.09],[.42,.14],[.48,.24],[.50,.38],[.48,.52],[.43,.64],[.36,.74],[.33,.70],[.40,.60],[.44,.48],[.45,.34],[.42,.20],[.35,.15],[.20,.17]]],
+  ['ear, hollow at the top', [[.20,.17],[.35,.15],[.36,.24],[.30,.26],[.19,.25]]],
+  ['ear, inner ridge', [[.26,.66],[.33,.70],[.40,.60],[.44,.48],[.45,.34],[.42,.20],[.35,.15],[.36,.24],[.30,.26],[.19,.25],[.18,.30],[.32,.32],[.36,.40],[.34,.50],[.30,.59]]],
+  ['ear, bowl', [[.14,.25],[.19,.25],[.18,.30],[.32,.32],[.36,.40],[.34,.50],[.30,.59],[.26,.66],[.19,.66],[.13,.60],[.12,.45]]],
+  ['ear, front flap', [[.04,.42],[.10,.38],[.13,.46],[.12,.57],[.06,.59],[.03,.50]]],
+  ['ear, small flap', [[.19,.66],[.26,.66],[.25,.73],[.18,.73]]],
+  ['earlobe', [[.36,.74],[.40,.80],[.40,.88],[.35,.96],[.27,1],[.19,.96],[.15,.86],[.17,.76],[.25,.73],[.33,.72]]],
+];
+
+const EAR_KEYS = [[.36, 0], [.27, 1], [.59, .30]];
+function earPts(row) {
+  const m = ear.a.x > P[1].x ? 1 : -1;
+  const T = EAR_KEYS.map(([u, v]) => [m * u, v]), Q = [ear.a, ear.b, ear.c];
+
+  const det = (T[1][0] - T[0][0]) * (T[2][1] - T[0][1]) - (T[2][0] - T[0][0]) * (T[1][1] - T[0][1]);
+  const solve = k => {
+    const d1 = Q[1][k] - Q[0][k], d2 = Q[2][k] - Q[0][k];
+    const A = (d1 * (T[2][1] - T[0][1]) - d2 * (T[1][1] - T[0][1])) / det, B = (d2 * (T[1][0] - T[0][0]) - d1 * (T[2][0] - T[0][0])) / det;
+    return [A, B, Q[0][k] - A * T[0][0] - B * T[0][1]];
+  };
+  const X = solve('x'), Y = solve('y');
+  return row.map(([u, v]) => ({ x: X[0] * m * u + X[1] * v + X[2], y: Y[0] * m * u + Y[1] * v + Y[2] }));
+}
+const inPoly = (x, y, pts) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const p = pts[i], q = pts[j]; if ((p.y > y) !== (q.y > y) && x < (q.x - p.x) * (y - p.y) / (q.y - p.y) + p.x) c = !c; } return c; };
+const gray = L => `rgb(${L|0},${L|0},${L|0})`;
+const lumOf = (r, g, b) => .299 * r + .587 * g + .114 * b;
+const status = t => { const s = $('#status'); s.textContent = t || ''; s.style.display = t ? 'block' : 'none'; };
+
+const ZORN = [
+  ['titanium white', [248, 246, 240], null],
+  ['yellow ochre', [196, 150, 60], [228, 205, 150]],
+  ['vermilion', [212, 52, 32], [236, 152, 132]],
+  ['ivory black', [26, 26, 30], [108, 110, 116]],
+];
+const EXTRAS = [
+  ['lamp black', [20, 20, 20], [72, 72, 74], true],
+  ['ultramarine blue', [32, 38, 112], [122, 138, 202], true],
+  ['cobalt blue', [30, 70, 170], [140, 165, 220], true],
+  ['cerulean blue', [40, 120, 180], [150, 195, 225], true],
+  ['phthalo blue', [12, 30, 90], [80, 130, 200], true],
+  ['phthalo green', [0, 70, 60], [80, 170, 150], true],
+  ['viridian', [20, 110, 90], [140, 195, 175], true],
+  ['sap green', [70, 100, 30], [165, 190, 130], true],
+  ['earth green', [104, 118, 84], [192, 202, 178], true],
+  ['lemon yellow', [244, 228, 46], [250, 244, 156], true],
+  ['cadmium yellow light', [250, 208, 10], [252, 234, 134], true],
+  ['cadmium yellow medium', [245, 180, 0], [250, 220, 120], true],
+  ['naples yellow', [240, 210, 140], [248, 232, 190], true],
+  ['cadmium orange', [235, 110, 20], [245, 175, 120], true],
+  ['cadmium red light', [226, 56, 32], [240, 154, 134], true],
+  ['alizarin crimson', [112, 22, 38], [214, 132, 162], true],
+  ['permanent rose', [200, 30, 90], [240, 150, 190], true],
+  ['quinacridone magenta', [150, 20, 80], [220, 130, 180], true],
+  ['dioxazine purple', [60, 20, 70], [160, 120, 180], true],
+  ['raw sienna', [180, 120, 50], [225, 190, 140], true],
+  ['burnt sienna', [140, 66, 36], [214, 160, 136], true],
+  ['raw umber', [90, 75, 55], [170, 160, 145], true],
+  ['burnt umber', [78, 52, 36], [166, 146, 130], true],
+];
+const lin = c => { c /= 255; return c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
+const unlin = c => 255 * (c <= .0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - .055);
+const ks = R => { R = Math.min(.999, Math.max(.001, R)); return (1 - R) ** 2 / (2 * R); };
+const KW = [0, 1, 2].map(i => ks(lin(ZORN[0][1][i])));
+function paint(name, mass, tint) {
+  if (!tint) return { name, mass, K: KW, S: [1, 1, 1] };
+  const K = [], S = [];
+  for (let i = 0; i < 3; i++) {
+    const a = ks(lin(mass[i])), b = ks(lin(tint[i]));
+    const Sp = a > b + 1e-6 ? Math.max(.02, (b - KW[i]) / (a - b)) : 1;
+    S.push(Sp); K.push(a * Sp);
+  }
+  return { name, mass, K, S };
+}
+function mixRGB(list) {
+  const out = [];
+  for (let i = 0; i < 3; i++) {
+    let K = 0, S = 0; for (const [p, w] of list) { K += w * p.K[i]; S += w * p.S[i]; }
+    const r = K / S, R = 1 + r - Math.sqrt(r * r + 2 * r); out.push(Math.max(0, Math.min(255, unlin(R))));
+  }
+  return out;
+}
+function lab([r, g, b]) {
+  const [R, G, B] = [r, g, b].map(lin);
+  const f = t => t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116;
+  const X = f((.4124 * R + .3576 * G + .1805 * B) / .9505), Y = f(.2126 * R + .7152 * G + .0722 * B), Z = f((.0193 * R + .1192 * G + .9505 * B) / 1.089);
+  return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+}
+const dE = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+const PARTS = [.5, 1, 1.5, 2, 3, 4], WHITE = [0, 1, 2, 3, 4];
+function best(target, paints) {
+  const T = lab(target), white = paints[0], others = paints.slice(1);
+  const tryMix = list => {
+    const rgb = mixRGB(list), e = dE(lab(rgb), T);
+
+    return { e, score: e + .5 * (list.length - 1) + .08 * list.reduce((t, [, w]) => t + w, 0), rgb, list: list.map(x => x.slice()) };
+  };
+  const bestOf = colors => {
+    let b = null;
+    for (const w of WHITE) { const r = tryMix(w ? [[white, w], ...colors] : colors); if (!b || r.score < b.score) b = r; }
+    return b;
+  };
+  const found = [];
+  for (let i = 0; i < others.length; i++) {
+    for (const a of PARTS) found.push({ set: [i], c: [[others[i], a]], r: bestOf([[others[i], a]]) });
+    for (let j = i + 1; j < others.length; j++)
+      for (const a of PARTS) for (const b of PARTS) found.push({ set: [i, j], c: [[others[i], a], [others[j], b]], r: bestOf([[others[i], a], [others[j], b]]) });
+  }
+  found.sort((x, y) => x.r.score - y.r.score);
+  let top = found[0].r;
+  const seen = new Set();
+  for (const f of found) {
+    const key = f.set.join(','); if (seen.has(key)) continue; seen.add(key); if (seen.size > 40) break;
+    for (let k = 0; k < others.length; k++) {
+      if (f.set.includes(k)) continue;
+      for (const w of PARTS) { const r = bestOf([...f.c, [others[k], w]]); if (r.score < top.score) top = r; }
+    }
+  }
+
+  if (top && top.list.every(([, w]) => w % 2 === 0)) top.list.forEach(x => x[1] /= 2);
+  if (top && top.list.every(([, w]) => w === top.list[0][1])) top.list.forEach(x => x[1] = 1);
+  return top;
+}
+let extrasOn = {};
+try { extrasOn = JSON.parse(localStorage.getItem('vf-paints') || 'null') || {}; } catch (e) {}
+const extrasBox = $('#extras');
+EXTRAS.forEach(([n, , , def]) => {
+  if (!(n in extrasOn)) extrasOn[n] = def;
+  const l = document.createElement('label');
+  l.innerHTML = `<input type="checkbox" ${extrasOn[n] ? 'checked' : ''}> ${n}`;
+  l.querySelector('input').onchange = e => { extrasOn[n] = e.target.checked; try { localStorage.setItem('vf-paints', JSON.stringify(extrasOn)); } catch (x) {} if (lastS) mixNow(lastS); };
+  extrasBox.appendChild(l);
+});
+const ZP = ZORN.map(([n, m, t]) => paint(n, m, t));
+const amt = w => w === .5 ? '½' : w % 1 ? `${w - .5}½` : `${w}`;
+const near = e => e < 4 ? 'very close' : e < 8 ? 'close' : e < 14 ? 'near' : 'rough';
+function block(title, r, target) {
+  if (!r) return '';
+  const lum = c => .299 * c[0] + .587 * c[1] + .114 * c[2];
+  const list = r.list.slice().sort((a, b) => lum(b[0].mass) - lum(a[0].mass));
+  const c = r.rgb.map(x => x | 0);
+  return `<div class="mixbox"><div class="mixhead">${title}<span>${near(r.e)} · value ${Math.round(toV(lum(r.rgb)))}</span></div>
+    <div class="mixsw"><span class="c" style="background:rgb(${target.map(x => x | 0)})"></span>photo
+      <span class="c" style="background:rgb(${c})"></span>this mix</div>
+    <ul class="parts">${list.map(([p, w]) => `<li><b>${amt(w)}</b><span class="dot" style="background:rgb(${p.mass})"></span>${p.name}</li>`).join('')}</ul></div>`;
+}
+let lastS = null, mixTimer = null;
+function mixLater(s) { lastS = s; clearTimeout(mixTimer); mixTimer = setTimeout(() => mixNow(s), 120); }
+function mixNow(s) {
+  const t = [s.r, s.g, s.b];
+  const z = best(t, ZP);
+  const ex = [...ZP, ...EXTRAS.filter(([n]) => extrasOn[n]).map(([n, m, tt]) => paint(n, m, tt))];
+  const e = ex.length > ZP.length ? best(t, ex) : null;
+
+  const top = e || z, zornOnly = e && !e.list.every(([p]) => ZORN.some(([n]) => n === p.name));
+  $('#mixes').innerHTML = block('Closest mix', top, t) + (zornOnly ? block('Zorn palette only', z, t) : '');
+}
+
+let landmarker = null;
+async function getLandmarker() {
+  if (landmarker) return landmarker;
+  status('Getting the face finder ready…');
+  const files = await FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  const opts = d => ({ baseOptions: { modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task', delegate: d }, runningMode: 'IMAGE', numFaces: 1 });
+  try { landmarker = await FaceLandmarker.createFromOptions(files, opts('GPU')); }
+  catch (e) { landmarker = await FaceLandmarker.createFromOptions(files, opts('CPU')); }
+  return landmarker;
+}
+
+function load(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const url = URL.createObjectURL(file), im = new Image();
+  im.onload = () => { setup(im); URL.revokeObjectURL(url); };
+  im.src = url;
+}
+async function setup(im) {
+  const k = Math.min(1, 2400 / Math.max(im.naturalWidth, im.naturalHeight));
+  W = Math.round(im.naturalWidth * k); H = Math.round(im.naturalHeight * k);
+  photo = document.createElement('canvas'); photo.width = W; photo.height = H;
+  const pc = photo.getContext('2d'); pc.drawImage(im, 0, 0, W, H); rgb = pc.getImageData(0, 0, W, H).data;
+  $('#empty').style.display = 'none'; view.style.display = 'block'; zoom = 1; vx = vy = 0; ear = null; earPick = 0; pickMsg(''); $('#earbtn').textContent = 'Add an ear'; fit(); P = null; hover = -1; draw();
+  try {
+    const lm = await getLandmarker(); status('Finding the face…');
+    const r = lm.detect(photo);
+    if (!r.faceLandmarks || !r.faceLandmarks.length) { status('No face found. Try a photo where the face is bigger and seen more from the front.'); return; }
+    P = r.faceLandmarks[0].map(p => ({ x: p.x * W, y: p.y * H, z: p.z * W }));
+    measure(); status(''); zoomToFace(); families();
+  } catch (e) { status('The face finder could not load. Check your internet connection and try again.'); console.error(e); }
+}
+
+let order = [];
+function shape(pl) {
+  const pts = pl.pts;
+  let a = 0; for (let k = 0; k < pts.length; k++) { const p = pts[k], q = pts[(k + 1) % pts.length]; a += p.x * q.y - q.x * p.y; }
+  pl.area = a / 2;
+  pl.cx = pts.reduce((t, p) => t + p.x, 0) / pts.length; pl.cy = pts.reduce((t, p) => t + p.y, 0) / pts.length;
+}
+function geometry() {
+  ALL = PLANES.filter(pl => pl.g === 'base' || pl.g === (detail ? 'det' : 'rep')).map(pl => {
+    const q = { ...pl, n_: pl.n, pts: pl.p.map(j => P[j]) };
+    shape(q); q.visible = Math.sign(q.area) === q.w && Math.abs(q.area) > 30;
+    q.z = q.pts.reduce((t, p) => t + p.z, 0) / q.pts.length; return q;
+  });
+  if (detail && P.length > 477) for (const side of ['right', 'left']) {
+    const [c, ...ring] = IRIS[side].map(j => P[j]), r = ring.reduce((t, p) => t + Math.hypot(p.x - c.x, p.y - c.y), 0) / ring.length;
+    const pts = Array.from({ length: 28 }, (_, k) => ({ x: c.x + r * Math.cos(k * Math.PI / 14), y: c.y + r * Math.sin(k * Math.PI / 14) }));
+    const q = { n_: 'iris', s: side, pts, clip: OPENING[side].map(j => P[j]), pr: 3, z: c.z };
+    shape(q); q.visible = ALL.some(o => o.s === side && o.n_.startsWith('white of the eye') && o.visible); ALL.push(q);
+  }
+  if (ear) EAR.forEach(([n, row], k) => {
+    const q = { n_: n, s: ear.a.x < P[1].x ? 'right' : 'left', pts: earPts(row), z: 1e9 - k, visible: true, ear: true };
+    shape(q); ALL.push(q);
+  });
+  ALL.forEach((pl, i) => { pl.i = i; });
+  order = ALL.filter(p => p.visible).sort((a, b) => (a.pr || 0) - (b.pr || 0) || b.z - a.z);
+}
+function measure() {
+  geometry();
+  ids = new Int16Array(W * H).fill(-1);
+  for (const pl of order) {
+    const xs = pl.pts.map(p => p.x), ys = pl.pts.map(p => p.y);
+    const x0 = Math.max(0, Math.floor(Math.min(...xs))), x1 = Math.min(W - 1, Math.ceil(Math.max(...xs)));
+    const y0 = Math.max(0, Math.floor(Math.min(...ys))), y1 = Math.min(H - 1, Math.ceil(Math.max(...ys)));
+    const n = pl.pts.length;
+    for (let y = y0; y <= y1; y++) {
+      const cross = [];
+      for (let k = 0; k < n; k++) {
+        const p = pl.pts[k], q = pl.pts[(k + 1) % n];
+        if ((p.y <= y + .5) !== (q.y <= y + .5)) cross.push(p.x + (y + .5 - p.y) / (q.y - p.y) * (q.x - p.x));
+      }
+      cross.sort((a, b) => a - b);
+      for (let c = 0; c + 1 < cross.length; c += 2)
+        for (let x = Math.max(x0, Math.ceil(cross[c] - .5)); x <= Math.min(x1, Math.floor(cross[c + 1] - .5)); x++)
+          if (!pl.clip || inPoly(x + .5, y + .5, pl.clip)) ids[y * W + x] = pl.i;
+    }
+  }
+  const buckets = ALL.map(() => ({ L: [], r: [], g: [], b: [] }));
+  for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) {
+    const id = ids[y * W + x]; if (id < 0) continue;
+    const q = (y * W + x) * 4, B = buckets[id];
+    B.r.push(rgb[q]); B.g.push(rgb[q + 1]); B.b.push(rgb[q + 2]); B.L.push(lumOf(rgb[q], rgb[q + 1], rgb[q + 2]));
+  }
+  const med = a => { if (!a.length) return 0; const s = Float32Array.from(a).sort(); return s[s.length >> 1]; };
+  ALL.forEach((pl, i) => { const B = buckets[i]; pl.n = B.L.length; pl.L = med(B.L); pl.rgb = [med(B.r), med(B.g), med(B.b)]; });
+
+  const vis = order.filter(p => p.n > 0 && !FEATURE.has(p.n_)), vals = [];
+  vis.forEach(p => vals.push([p.L, p.n]));
+  let best = 128, bestS = -1;
+  for (let t = 10; t < 250; t += 2) {
+    let w0 = 0, w1 = 0, s0 = 0, s1 = 0;
+    for (const [L, n] of vals) { if (L < t) { w0 += n; s0 += L * n; } else { w1 += n; s1 += L * n; } }
+    if (!w0 || !w1) continue;
+    const s = w0 * w1 * (s0 / w0 - s1 / w1) ** 2; if (s > bestS) { bestS = s; best = t; }
+  }
+  cut = best;
+}
+const stepL = (L, n) => {
+  if (n === 11) return Math.round(L / 25.5) * 25.5;
+  const k = Math.min(n - 1, Math.floor(L / 256 * n)); return (k + .5) * 256 / n;
+};
+const stepNum = (L, n) => n === 11 ? Math.round(L / 25.5) : Math.round(toV(stepL(L, n)));
+
+function fit() {
+  const maxW = stage.clientWidth - 2, maxH = Math.max(360, window.innerHeight - 162 - (document.querySelector('.sx-site') || { offsetHeight: 58 }).offsetHeight);
+  scaleK = Math.min(maxW / W, maxH / H);
+  const dpr = window.devicePixelRatio || 1;
+  view.style.width = W * scaleK + 'px'; view.style.height = H * scaleK + 'px';
+  view.width = Math.round(W * scaleK * dpr); view.height = Math.round(H * scaleK * dpr);
+  clampView();
+}
+const sc = () => scaleK * zoom;
+function clampView() {
+  vx = Math.max(0, Math.min(W - W / zoom, vx)); vy = Math.max(0, Math.min(H - H / zoom, vy));
+}
+function zoomAt(z, px, py) {
+  const ox = (px - vx) * zoom, oy = (py - vy) * zoom;
+  zoom = Math.max(1, Math.min(12, z));
+  vx = px - ox / zoom; vy = py - oy / zoom; clampView(); draw();
+}
+function zoomToFace() {
+  if (!P) return;
+  const xs = P.map(p => p.x), ys = P.map(p => p.y);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  zoom = Math.max(1, Math.min(12, .8 * Math.min(W / (x1 - x0), H / (y1 - y0))));
+  vx = (x0 + x1) / 2 - W / zoom / 2; vy = (y0 + y1) / 2 - H / zoom / 2; clampView(); draw();
+}
+function clipTo(pl) { if (!pl.clip) return; ctx.beginPath(); pl.clip.forEach((p, k) => k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); ctx.clip(); }
+function path(pl) { ctx.beginPath(); pl.pts.forEach((p, k) => k ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)); ctx.closePath(); }
+function fillOf(pl) {
+  if (mode === 'values') return gray(stepL(pl.L, nSteps));
+  if (mode === 'colors') return `rgb(${pl.rgb.map(v => v | 0)})`;
+  if (mode === 'families') return FEATURE.has(pl.n_) ? null : pl.L < cut ? '#5E4332' : '#EAD7BC';
+  return null;
+}
+function draw() {
+  if (!photo) return;
+  const dpr = view.width / (W * scaleK), s = sc(), u = 1 / s;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, view.width, view.height);
+  ctx.setTransform(s * dpr, 0, 0, s * dpr, -vx * s * dpr, -vy * s * dpr);
+  ctx.imageSmoothingQuality = 'high'; ctx.drawImage(photo, 0, 0);
+  if (!P) return;
+  ctx.lineJoin = 'round';
+  for (const pl of order) {
+    const f = fillOf(pl);
+    if (f) { ctx.save(); clipTo(pl); ctx.globalAlpha = alpha; path(pl); ctx.fillStyle = f; ctx.fill(); ctx.restore(); }
+  }
+  const lw = detail ? .8 : 1;
+  for (const pl of order) {
+    ctx.save(); clipTo(pl); path(pl);
+    if (mode === 'lines') { ctx.lineWidth = 3 * lw * u; ctx.strokeStyle = 'rgba(251,248,241,.9)'; ctx.stroke(); }
+    ctx.lineWidth = 1.2 * lw * u; ctx.strokeStyle = 'rgba(41,43,38,.85)'; ctx.stroke(); ctx.restore();
+  }
+  if (hover >= 0 && ALL[hover] && ALL[hover].visible) {
+    const h = ALL[hover]; ctx.save(); clipTo(h); path(h);
+    ctx.lineWidth = 4 * u; ctx.strokeStyle = '#FBF8F1'; ctx.stroke(); ctx.lineWidth = 2 * u; ctx.strokeStyle = '#D9603F'; ctx.stroke(); ctx.restore();
+  }
+  if (ear) for (const k of ['a', 'b', 'c']) {
+    if (!ear[k]) continue; ctx.beginPath(); ctx.arc(ear[k].x, ear[k].y, 6 * u, 0, 7); ctx.fillStyle = '#FBF8F1'; ctx.fill();
+    ctx.lineWidth = 2 * u; ctx.strokeStyle = '#D9603F'; ctx.stroke();
+  }
+  if (nums) {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const placed = [];
+    for (const pl of order.slice().sort((a, b) => Math.abs(b.area) - Math.abs(a.area))) {
+      if (Math.abs(pl.area) < 1400) continue;
+      if (placed.some(([x, y]) => Math.abs(x - pl.cx) < 26 * u && Math.abs(y - pl.cy) < 20 * u)) continue;
+      placed.push([pl.cx, pl.cy]);
+      const t = String(stepNum(pl.L, nSteps)), fs = Math.max(11, Math.min(18, Math.sqrt(Math.abs(pl.area)) * s / 4)) * u;
+      ctx.font = `bold ${fs}px Figtree, sans-serif`;
+      const w = ctx.measureText(t).width + 8 * u;
+      ctx.fillStyle = 'rgba(251,248,241,.9)'; ctx.fillRect(pl.cx - w / 2, pl.cy - fs * .7, w, fs * 1.4);
+      ctx.fillStyle = '#292B26'; ctx.fillText(t, pl.cx, pl.cy + u);
+    }
+  }
+}
+const sideName = s => s === 'right' ? 'their right, your left' : s === 'left' ? 'their left, your right' : 'center';
+function showPlane(i) {
+  if (i < 0) { $('#plane').innerHTML = '<div class="none">Hover over a plane.</div>'; return; }
+  const pl = ALL[i], v = toV(pl.L);
+  $('#plane').innerHTML = `<div class="pname">${pl.n_ || pl.n}</div><div class="pside">${sideName(pl.s)} · ${FEATURE.has(pl.n_) ? 'dark from its own color, not shadow' : pl.L < cut ? 'shadow family' : 'light family'}</div>
+    <div class="readout"><div><div class="sw" style="background:rgb(${pl.rgb.map(x => x | 0)})"></div><div class="swlabel">color</div></div>
+    <div><div class="sw" style="background:${gray(pl.L)}"></div><div class="swlabel">its value</div></div>
+    <div class="val">${Math.round(v)}<small>${v.toFixed(1)} on 0–10</small></div></div>`;
+  mixLater({ r: pl.rgb[0], g: pl.rgb[1], b: pl.rgb[2] });
+}
+function families() {
+  const all = order.filter(p => p.n > 0).slice().sort((a, b) => b.L - a.L), vis = all.filter(p => !FEATURE.has(p.n_)), feat = all.filter(p => FEATURE.has(p.n_));
+  const li = p => `<li><b>${Math.round(toV(p.L))}</b>${p.n_ || p.n}${p.s ? (p.s === 'right' ? ' (R)' : ' (L)') : ''}</li>`;
+  const light = vis.filter(p => p.L >= cut), dark = vis.filter(p => p.L < cut);
+  $('#fam').innerHTML = `<h2>Light and shadow families</h2><div class="none">Split at value ${toV(cut).toFixed(1)}: lighter planes face the light, darker ones turn away. R and L are their right and left.</div>
+    <h3><i style="background:#EAD7BC"></i>Light family</h3><ul>${light.map(li).join('')}</ul>
+    <h3><i style="background:#5E4332"></i>Shadow family</h3><ul>${dark.map(li).join('')}</ul>
+    <h3><i style="background:transparent"></i>Dark from their own color, not shadow</h3><ul>${feat.map(li).join('')}</ul>`;
+}
+
+const toPhoto = e => { const b = view.getBoundingClientRect(); return [vx + (e.clientX - b.left) / sc(), vy + (e.clientY - b.top) / sc()]; };
+
+const touches = new Map(); let drag = null, pinch = null;
+view.addEventListener('pointerdown', e => {
+  if (P && earPick) {
+    const [x, y] = toPhoto(e);
+    if (earPick === 1) { ear = { a: { x, y }, temp: true }; earPick = 2; pickMsg('Now click the bottom of the earlobe.'); draw(); }
+    else if (earPick === 2) { ear.b = { x, y }; earPick = 3; pickMsg('Last, click the back edge of the ear, where it is widest.'); draw(); }
+    else { ear.c = { x, y }; delete ear.temp; earPick = 0; pickMsg(''); $('#earbtn').textContent = 'Remove ear'; refresh(); }
+    return;
+  }
+  if (ear && !ear.temp) {
+    const k = ['a', 'b', 'c'].find(k => Math.hypot((ear[k].x - vx) * sc() - (e.clientX - view.getBoundingClientRect().left), (ear[k].y - vy) * sc() - (e.clientY - view.getBoundingClientRect().top)) < 12);
+    if (k) { earDrag = k; view.setPointerCapture(e.pointerId); return; }
+  }
+  view.setPointerCapture(e.pointerId); touches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (touches.size === 2) {
+    const [a, b] = [...touches.values()], r = view.getBoundingClientRect();
+    pinch = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z: zoom, p: [vx + ((a[0] + b[0]) / 2 - r.left) / sc(), vy + ((a[1] + b[1]) / 2 - r.top) / sc()] };
+    drag = null;
+  } else drag = { x: e.clientX, y: e.clientY, vx, vy, moved: false };
+});
+view.addEventListener('pointermove', e => {
+  if (earDrag) {
+    const [x, y] = toPhoto(e); ear[earDrag] = { x, y };
+    ALL.filter(q => q.ear).forEach((q, k) => { q.pts = earPts(EAR[k][1]); shape(q); }); draw(); return;
+  }
+  if (touches.has(e.pointerId)) touches.set(e.pointerId, [e.clientX, e.clientY]);
+  if (pinch && touches.size === 2) {
+    const [a, b] = [...touches.values()];
+    zoomAt(pinch.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch.d, ...pinch.p); return;
+  }
+  if (drag && zoom > 1) {
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (drag.moved || Math.hypot(dx, dy) > 4) {
+      drag.moved = true; view.classList.add('panning');
+      vx = drag.vx - dx / sc(); vy = drag.vy - dy / sc(); clampView(); draw(); return;
+    }
+  }
+  if (!P) return;
+  const [fx, fy] = toPhoto(e), x = Math.floor(fx), y = Math.floor(fy);
+  const id = x >= 0 && y >= 0 && x < W && y < H ? ids[y * W + x] : -1;
+  if (id !== hover) { hover = id; showPlane(id); draw(); }
+});
+const endPointer = e => { if (earDrag) { earDrag = null; refresh(); return; } touches.delete(e.pointerId); if (touches.size < 2) pinch = null; if (!touches.size) { drag = null; view.classList.remove('panning'); } };
+view.addEventListener('pointerup', endPointer); view.addEventListener('pointercancel', endPointer);
+view.addEventListener('pointerleave', () => { if (!drag) { hover = -1; draw(); } });
+
+view.addEventListener('wheel', e => {
+  if (!photo) return; e.preventDefault();
+  if (e.ctrlKey || e.deltaMode || Math.abs(e.deltaY) >= 50 && !e.deltaX) zoomAt(zoom * Math.exp(-e.deltaY * (e.ctrlKey ? .01 : .002)), ...toPhoto(e));
+  else { vx += e.deltaX / sc(); vy += e.deltaY / sc(); clampView(); draw(); }
+}, { passive: false });
+view.addEventListener('dblclick', e => zoomAt(zoom * 2, ...toPhoto(e)));
+const mid = () => [vx + W / zoom / 2, vy + H / zoom / 2];
+$('#zin').onclick = () => zoomAt(zoom * 1.5, ...mid());
+$('#zout').onclick = () => zoomAt(zoom / 1.5, ...mid());
+$('#zface').onclick = zoomToFace;
+function zoomToIds(list, frac) {
+  const xs = list.map(j => P[j].x), ys = list.map(j => P[j].y);
+  zoomToBox(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys), frac);
+}
+function zoomToBox(x0, y0, x1, y1, frac) {
+  zoom = Math.max(1, Math.min(12, frac * Math.min(W / (x1 - x0), H / (y1 - y0))));
+  vx = (x0 + x1) / 2 - W / zoom / 2; vy = (y0 + y1) / 2 - H / zoom / 2; clampView(); draw();
+}
+function setDetail(on) { detail = on; $('#detail').classList.toggle('on', on); if (P) refresh(); }
+function refresh() { hover = -1; measure(); families(); showPlane(-1); draw(); }
+const pickMsg = t => { const m = $('#pick'); m.textContent = t; m.style.display = t ? 'block' : 'none'; };
+$('#detail').onclick = () => setDetail(!detail);
+const FEATURE_ZOOM = {
+  eyes: [[70, 63, 105, 66, 107, 336, 296, 334, 293, 300, 31, 228, 229, 230, 231, 261, 448, 449, 450, 451, 130, 359], .92],
+  nose: [[168, 193, 417, 98, 327, 64, 294, 2, 129, 358, 1], .8],
+  lips: [[164, 57, 287, 18, 61, 291, 0, 17], .8],
+};
+document.querySelectorAll('[data-zoom]').forEach(b => b.onclick = () => {
+  if (!P) return; const [list, f] = FEATURE_ZOOM[b.dataset.zoom]; if (!detail) setDetail(true); zoomToIds(list, f);
+});
+$('#zear').onclick = () => {
+  if (!P) return; if (!ear || ear.temp) { $('#earbtn').click(); return; }
+  const pts = ALL.filter(q => q.ear).flatMap(q => q.pts), xs = pts.map(p => p.x), ys = pts.map(p => p.y);
+  zoomToBox(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys), .75);
+};
+$('#earbtn').onclick = () => {
+  if (!P) return;
+  if (ear) { ear = null; earPick = 0; pickMsg(''); $('#earbtn').textContent = 'Add an ear'; refresh(); return; }
+  earPick = 1; pickMsg('Click the top of the ear.');
+};
+$('#zall').onclick = () => { zoom = 1; vx = vy = 0; draw(); };
+
+$('#file').onchange = e => load(e.target.files[0]);
+['dragenter', 'dragover'].forEach(t => stage.addEventListener(t, e => { e.preventDefault(); stage.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(t => stage.addEventListener(t, e => { e.preventDefault(); stage.classList.remove('drag'); }));
+stage.addEventListener('drop', e => load(e.dataTransfer.files[0]));
+window.addEventListener('paste', e => { const f = [...e.clipboardData.items].find(i => i.type.startsWith('image/')); if (f) load(f.getAsFile()); });
+document.querySelectorAll('#views button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#views button').forEach(x => x.classList.toggle('on', x === b)); mode = b.dataset.view; draw();
+});
+$('#steps').onchange = e => { nSteps = +e.target.value; draw(); };
+$('#nums').onclick = () => { nums = !nums; $('#nums').classList.toggle('on', nums); draw(); };
+$('#alpha').oninput = e => { alpha = +e.target.value / 100; draw(); };
+window.addEventListener('resize', () => { if (photo) { fit(); draw(); } });
+window.loadPortrait = load;
+</script>
+</body>
+</html>
